@@ -1,0 +1,117 @@
+// packages/db/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// 🔹 User model (Student, Professor, Admin)
+//
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String     // hashed password
+  role      Role       @default(STUDENT)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  attendance Attendance[]  @relation("StudentAttendance")
+  taught      Attendance[] @relation("ProfessorAttendance")
+  notes       Note[]       @relation("ProfessorNotes")
+  events      Event[]      @relation("CreatedEvents")
+  rsvps       RSVP[]
+}
+
+//
+// 🔹 Attendance model
+//
+model Attendance {
+  id          String             @id @default(uuid())
+  date        DateTime
+  status      AttendanceStatus
+  classId     String   // e.g. "CS101"
+
+  // Relations
+  studentId   String
+  student     User @relation("StudentAttendance", fields: [studentId], references: [id])
+
+  professorId String
+  professor   User @relation("ProfessorAttendance", fields: [professorId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+//
+// 🔹 Notes uploaded by professors
+//
+model Note {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String   // S3 or file storage link
+  uploadedAt  DateTime @default(now())
+
+  // Relations
+  uploadedBy  String
+  professor   User     @relation("ProfessorNotes", fields: [uploadedBy], references: [id])
+}
+
+//
+// 🔹 Events
+//
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  date        DateTime
+  createdAt   DateTime @default(now())
+
+  // Relations
+  createdBy   String
+  creator     User     @relation("CreatedEvents", fields: [createdBy], references: [id])
+  rsvps       RSVP[]
+}
+
+//
+// 🔹 RSVP for Events
+//
+model RSVP {
+  id        String     @id @default(uuid())
+  status    RSVPStatus @default(PENDING)
+
+  // Relations
+  userId    String
+  user      User  @relation(fields: [userId], references: [id])
+  eventId   String
+  event     Event @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+//
+// 🔹 Enums
+//
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum RSVPStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum Role {
+  STUDENT
+  PROFESSOR
+  ADMIN
+}

@@ -2,7 +2,13 @@ import express from "express";
 import type { Request, Response } from "express";   
 import cors from "cors";
 import dotenv from "dotenv";
-
+import prisma from '@campusone/db';
+ // Removed because module not found
+ export const getAttendanceByStudent = async (studentId: string) => {
+  return await prisma.attendance.findMany({
+    where: { studentId }
+  });
+};
 dotenv.config();
 const app = express();
 app.use(cors());
