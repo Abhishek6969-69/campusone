@@ -155,6 +155,10 @@ async function main() {
   });
 
   console.log("✅ Database has been fully seeded (idempotent)!");
+  console.log("Professor John ID:", profJohn.id);
+  console.log("Professor Alice ID:", profAlice.id);
+  console.log("Student Bob ID:", studentBob.id);
+  console.log("Student Carol ID:", studentCarol.id);
 }
 
 main()
