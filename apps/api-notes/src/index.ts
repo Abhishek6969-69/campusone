@@ -5,7 +5,12 @@ import noteRoutes from "./routes/note.routes.ts";
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // ✅ not '*'
+    credentials: true,               // ✅ allow cookies/auth headers
+  })
+);
 app.use(express.json());
 
 // Routes

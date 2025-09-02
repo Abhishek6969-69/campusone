@@ -1,6 +1,2 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
-export default prisma;
-export { PrismaClient };
+export { default as prisma } from "./prisma";   // server-side
+export { default as colleges } from "./colleges"; // client-safe

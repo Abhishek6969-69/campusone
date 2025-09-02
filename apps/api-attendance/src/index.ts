@@ -7,7 +7,12 @@ dotenv.config(); // load environment variables
 
 const app = express();
 
-app.use(cors()); // allow frontend (Next.js) to call API
+app.use(
+  cors({
+    origin: "http://localhost:3000", // ✅ not '*'
+    credentials: true,               // ✅ allow cookies/auth headers
+  })
+);// allow frontend (Next.js) to call API
 app.use(express.json()); // parse JSON request bodies
 
 // Register routes

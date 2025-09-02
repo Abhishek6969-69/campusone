@@ -11,18 +11,29 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^6.15.0",
     "@repo/ui": "*",
+    "@tanstack/react-query": "^5.85.6",
+    "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
+    "lucide-react": "^0.542.0",
     "next": "^15.5.0",
+    "next-auth": "^4.24.11",
+    "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.34.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
     "typescript": "5.9.2"
   }
 }

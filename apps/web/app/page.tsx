@@ -1,102 +1,97 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+"use client";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+import { useState, useMemo } from "react";
+import {colleges} from "@campusone/db"; // client-safe import (your JSON)
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+export default function HomePage() {
+  const [selectedCollege, setSelectedCollege] = useState("");
+  const [query, setQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // ✅ Filter colleges dynamically
+  const filteredColleges = useMemo(() => {
+    if (!query.trim()) return colleges;
+    return colleges.filter(
+      (college: any) =>
+        college.name?.toLowerCase().includes(query.toLowerCase()) ||
+        college.city?.toLowerCase().includes(query.toLowerCase()) ||
+        college.state?.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
+
+  const handleSelect = (collegeName: string) => {
+    setSelectedCollege(collegeName);
+    setQuery(collegeName); // fill the search box with selected college
+    setShowDropdown(false); // ✅ close dropdown
+  };
 
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-10 max-w-lg w-full">
+        <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
+          Welcome to CampusOne
+        </h1>
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
+          Your Digital Campus Home
+        </p>
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.com/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+        {/* 🔍 Searchable Select */}
+        <div className="relative mb-6">
+          <input
+            type="text"
+            placeholder="Search or select your college..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelectedCollege(""); // reset selection when typing
+              setShowDropdown(true); // open dropdown when typing
+            }}
+            onFocus={() => setShowDropdown(true)} // reopen if input focused
+            className="w-full p-3 border rounded-lg text-gray-800 dark:text-white dark:bg-gray-800"
+          />
+          {showDropdown && query && (
+            <ul className="absolute z-10 bg-white dark:bg-gray-800 border rounded-lg mt-1 max-h-48 overflow-y-auto w-full shadow-lg">
+              {filteredColleges.length === 0 ? (
+                <li className="p-2 text-gray-500">No colleges found</li>
+              ) : (
+                filteredColleges.map((college: any, index: number) => (
+                  <li
+                    key={index}
+                    onClick={() => handleSelect(college.name)}
+                    className="p-2 hover:bg-blue-100 dark:hover:bg-gray-700 cursor-pointer"
+                  >
+                    {college.name} ({college.city})
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.com?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.com →
-        </a>
-      </footer>
+
+        {/* Signup Buttons */}
+        <div className="flex gap-4">
+          <button
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow"
+            disabled={!selectedCollege}
+          >
+            Sign Up as a Student
+          </button>
+          <button
+            className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-4 rounded-lg shadow"
+            disabled={!selectedCollege}
+          >
+            Sign Up as a Professor
+          </button>
+        </div>
+
+        {/* Sign In */}
+        <p className="mt-6 text-center text-gray-600 dark:text-gray-300">
+          Already have an account?{" "}
+          <a href="/signin" className="text-blue-600 font-medium">
+            Sign In
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

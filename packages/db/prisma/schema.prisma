@@ -1,5 +1,3 @@
-// packages/db/prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,42 +8,103 @@ datasource db {
 }
 
 //
+// 🔹 College model (with metadata)
+//
+model College {
+  id           String        @id @default(uuid())
+  name         String      @unique
+  domain       String?       @unique
+  city         String?
+  state        String?
+  type         String?       // Government / Private
+  affiliation  String?       // e.g., "Institute of National Importance"
+
+  // Relations
+  users        User[]
+  allowedUsers AllowedUser[]
+  classes      Class[]
+  notes        Note[]
+  events       Event[]
+  attendance   Attendance[]
+  rsvps        RSVP[]
+}
+
+//
+// 🔹 AllowedUser (whitelist of valid accounts)
+//
+model AllowedUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      Role
+  college   College  @relation(fields: [collegeId], references: [id])
+  collegeId String
+  createdAt DateTime @default(now())
+}
+
+//
 // 🔹 User model (Student, Professor, Admin)
 //
 model User {
-  id        String     @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
-  email     String     @unique
-  password  String     // hashed password
-  role      Role       @default(STUDENT)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to College
+  college   College  @relation(fields: [collegeId], references: [id])
+  collegeId String
 
   // Relations
-  attendance Attendance[]  @relation("StudentAttendance")
-  taught      Attendance[] @relation("ProfessorAttendance")
-  notes       Note[]       @relation("ProfessorNotes")
-  events      Event[]      @relation("CreatedEvents")
-  rsvps       RSVP[]
+  attendance    Attendance[] @relation("StudentAttendance")
+  taught        Attendance[] @relation("ProfessorAttendance")
+  notes         Note[]       @relation("ProfessorNotes")
+  createdEvents Event[]      @relation("CreatedEvents")
+  RSVPs         RSVP[]
+  classes       Class[]      @relation("ProfessorClasses")
+  sessions      Session[]    // Added relation to Session
+  accounts      Account[]    // Added relation to Account
 }
 
 //
 // 🔹 Attendance model
 //
 model Attendance {
-  id          String             @id @default(uuid())
+  id          String           @id @default(uuid())
+  studentId   String
+  professorId String
+  classId     String
   date        DateTime
   status      AttendanceStatus
-  classId     String   // e.g. "CS101"
+  createdAt   DateTime         @default(now())
 
-  // Relations
-  studentId   String
-  student     User @relation("StudentAttendance", fields: [studentId], references: [id])
+  student   User    @relation("StudentAttendance", fields: [studentId], references: [id])
+  professor User    @relation("ProfessorAttendance", fields: [professorId], references: [id])
+  class     Class   @relation(fields: [classId], references: [id])
 
+  // Link to College
+  college   College @relation(fields: [collegeId], references: [id])
+  collegeId String
+}
+
+//
+// 🔹 Class model
+//
+model Class {
+  id          String       @id @default(uuid())
+  code        String
+  name        String
   professorId String
-  professor   User @relation("ProfessorAttendance", fields: [professorId], references: [id])
+  professor   User         @relation("ProfessorClasses", fields: [professorId], references: [id])
+  attendance  Attendance[]
 
-  createdAt   DateTime @default(now())
+  // Link to College
+  college   College @relation(fields: [collegeId], references: [id])
+  collegeId String
+
+  @@unique([code, collegeId]) // unique per college
 }
 
 //
@@ -55,12 +114,15 @@ model Note {
   id          String   @id @default(uuid())
   title       String
   description String?
-  fileUrl     String   // S3 or file storage link
+  fileUrl     String
   uploadedAt  DateTime @default(now())
 
-  // Relations
-  uploadedBy  String
-  professor   User     @relation("ProfessorNotes", fields: [uploadedBy], references: [id])
+  uploadedBy String
+  professor  User   @relation("ProfessorNotes", fields: [uploadedBy], references: [id])
+
+  // Link to College
+  college   College @relation(fields: [collegeId], references: [id])
+  collegeId String
 }
 
 //
@@ -73,26 +135,32 @@ model Event {
   date        DateTime
   createdAt   DateTime @default(now())
 
-  // Relations
-  createdBy   String
-  creator     User     @relation("CreatedEvents", fields: [createdBy], references: [id])
-  rsvps       RSVP[]
+  createdBy String
+  creator   User   @relation("CreatedEvents", fields: [createdBy], references: [id])
+  rsvps     RSVP[]
+
+  // Link to College
+  college   College @relation(fields: [collegeId], references: [id])
+  collegeId String
 }
 
 //
-// 🔹 RSVP for Events
+// 🔹 RSVP
 //
 model RSVP {
-  id        String     @id @default(uuid())
-  status    RSVPStatus @default(PENDING)
+  id     String     @id @default(uuid())
+  status RSVPStatus @default(PENDING)
 
-  // Relations
-  userId    String
-  user      User  @relation(fields: [userId], references: [id])
-  eventId   String
-  event     Event @relation(fields: [eventId], references: [id])
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
 
   createdAt DateTime @default(now())
+
+  // Link to College
+  college   College @relation(fields: [collegeId], references: [id])
+  collegeId String
 }
 
 //
@@ -114,4 +182,42 @@ enum Role {
   STUDENT
   PROFESSOR
   ADMIN
+  SUPERADMIN
+}
+
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? 
+  access_token      String? 
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

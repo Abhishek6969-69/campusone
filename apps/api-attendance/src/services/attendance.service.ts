@@ -1,12 +1,39 @@
-import prisma from "@campusone/db";
 
-type BulkRecord = { studentId: string; status: string };
+import {prisma } from "@campusone/db";
+import { AttendanceStatus } from "@prisma/client";
+
+type BulkRecord = { studentId: string; status: AttendanceStatus };
+
+// ✅ Mark single attendance
+export const markAttendance = async (data: {
+  studentId: string;
+  professorId: string;
+  classId: string;
+  status: AttendanceStatus;
+  date: Date;
+  collegeId: string;
+}) => {
+  return await prisma.attendance.create({ data });
+};
+
+// ✅ Get attendance by student (college-scoped)
+export const getAttendanceByStudent = async (studentId: string, collegeId: string) => {
+  return await prisma.attendance.findMany({
+    where: { studentId, collegeId },
+    include: {
+      class: { select: { id: true, code: true, name: true } },
+      professor: { select: { id: true, name: true, email: true } },
+    },
+    orderBy: { date: "desc" },
+  });
+};
 
 // ✅ Bulk mark attendance
 export const bulkMarkAttendance = async (
   classId: string,
   professorId: string,
   date: string,
+  collegeId: string,
   records: BulkRecord[]
 ) => {
   return await prisma.attendance.createMany({
@@ -15,27 +42,29 @@ export const bulkMarkAttendance = async (
       professorId,
       classId,
       date: new Date(date),
-      status: r.status as any
+      status: r.status,
+      collegeId,
     })),
-    skipDuplicates: true
+    skipDuplicates: true,
   });
 };
 
 // ✅ Attendance percentage for student
-// ✅ Attendance percentage for student (with counts)
-export const getAttendancePercentage = async (studentId: string, classId: string) => {
-  // count how many sessions total
+export const getAttendancePercentage = async (
+  studentId: string,
+  classId: string,
+  collegeId: string
+) => {
   const totalSessions = await prisma.attendance.findMany({
-    where: { classId },
-    distinct: ["date"]
+    where: { classId, collegeId },
+    distinct: ["date"],
   });
 
   const total = totalSessions.length;
 
-  // count how many sessions the student was present
   const present = await prisma.attendance.findMany({
-    where: { studentId, classId, status: "PRESENT" },
-    distinct: ["date"]
+    where: { studentId, classId, collegeId, status: "PRESENT" },
+    distinct: ["date"],
   });
 
   const presentCount = present.length;
@@ -46,41 +75,39 @@ export const getAttendancePercentage = async (studentId: string, classId: string
     totalSessions: total,
     present: presentCount,
     absent: total - presentCount,
-    percentage
+    percentage,
   };
 };
 
-
 // ✅ Attendance summary for class
-export const getClassSummary = async (classId: string) => {
+export const getClassSummary = async (classId: string, collegeId: string) => {
   const totalSessions = await prisma.attendance.findMany({
-    where: { classId },
-    distinct: ["date"]
+    where: { classId, collegeId },
+    distinct: ["date"],
   });
 
   const students = await prisma.attendance.groupBy({
     by: ["studentId"],
-    where: { classId },
-    _count: { _all: true }
+    where: { classId, collegeId },
+    _count: { _all: true },
   });
 
-  // fetch student details + presence count
   const result = await Promise.all(
     students.map(async s => {
       const presentCount = await prisma.attendance.count({
-        where: { classId, studentId: s.studentId, status: "PRESENT" }
+        where: { classId, studentId: s.studentId, collegeId, status: "PRESENT" },
       });
 
       const student = await prisma.user.findUnique({
         where: { id: s.studentId },
-        select: { id: true, name: true, email: true }
+        select: { id: true, name: true, email: true },
       });
 
       return {
         ...student,
         present: presentCount,
         absent: s._count._all - presentCount,
-        percentage: Math.round((presentCount / s._count._all) * 100)
+        percentage: Math.round((presentCount / s._count._all) * 100),
       };
     })
   );
@@ -88,6 +115,6 @@ export const getClassSummary = async (classId: string) => {
   return {
     classId,
     totalSessions: totalSessions.length,
-    students: result
+    students: result,
   };
 };

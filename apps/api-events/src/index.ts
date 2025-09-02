@@ -1,24 +1,24 @@
 import express from "express";
-import type  {Request,Response} from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import eventRoutes from "./routes/event.routes.ts";
+
 dotenv.config();
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // ✅ not '*'
+    credentials: true,               // ✅ allow cookies/auth headers
+  })
+);
 app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
-  res.json({ service: "events", status: "running" });
-});
-
-// Example route for fetching events
-app.get("/events", (req: Request, res: Response) => {
-  res.json([
-    { id: 1, title: "Hackathon 2025", date: "2025-09-15" },
-    { id: 2, title: "AI Workshop", date: "2025-10-01" }
-  ]);
-});
+// Routes
+app.use("/events", eventRoutes);
 
 const PORT = process.env.PORT || 4003;
-app.listen(PORT, () => console.log(`Events API running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Event API running on port ${PORT}`);
+});
