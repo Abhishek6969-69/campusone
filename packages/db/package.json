@@ -1,12 +1,10 @@
 {
   "name": "@campusone/db",
   "version": "1.0.0",
-  "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-   "./prisma": "./src/index.ts",
-    "./colleges": "./src/colleges.ts",
-  "scripts": {
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+    "scripts": {
+    "build": "prisma generate && tsc -p tsconfig.build.json",
     "migrate": "prisma migrate dev --schema prisma/schema.prisma",
     "generate": "prisma generate --schema prisma/schema.prisma",
     "seed": "node --loader ts-node/esm prisma/seed.ts"

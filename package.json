@@ -8,8 +8,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "db:migrate": "prisma migrate dev --schema packages/db/prisma/schema.prisma",
-  "db:generate": "prisma generate --schema packages/db/prisma/schema.prisma",
-  "db:seed": "ts-node packages/db/prisma/seed.ts"
+    "db:generate": "prisma generate --schema packages/db/prisma/schema.prisma",
+    "db:seed": "ts-node packages/db/prisma/seed.ts"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
@@ -23,5 +23,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@campusone/db": "^1.0.0"
+  }
 }

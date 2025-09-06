@@ -8,7 +8,10 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "module": "ESNext"
   },
   "include": [
     "**/*.ts",

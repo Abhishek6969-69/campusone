@@ -38,16 +38,22 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ error: "No token provided" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    // For development, use the same hardcoded secret as NextAuth
+    const JWT_SECRET = "1fa5a2ede80c596e194c53be8216445230f791c6964aa1dd9d7b9bee435985ab";
+    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET || JWT_SECRET) as {
+      id: string;
+      email: string;
+      role: string;
+      collegeId: string;
+    };
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, role: true, email: true, collegeId: true },
-    });
-
-    if (!user) return res.status(401).json({ error: "User not found" });
-
-    req.user = user;
+    // Use the decoded token data directly since it's signed by NextAuth
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+      collegeId: decoded.collegeId
+    };
     next();
   } catch (err) {
     res.status(401).json({ error: "Unauthorized" });

@@ -6,7 +6,7 @@ import {
   getNotesByProfessor,
   deleteNote,
 } from "../controllers/note.controller.ts";
-import { authMiddleware}  from "../middleware/auth.ts";
+import { authMiddleware } from "../middleware/auth.ts";
 
 const router = Router();
 

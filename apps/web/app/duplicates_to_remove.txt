@@ -1,0 +1,11 @@
+# Duplicate Files to Remove
+
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/page.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/events/page.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/notes/page.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/profile/page.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/signup/page.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/(dashboard)/student/page.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/(dashboard)/student/layout.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/api/signup/route.js
+- /Users/abhishekyadav/Desktop/campusone/apps/web/app/api/auth/[...nextauth]/route.js

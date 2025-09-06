@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import colleges from "./colleges.json" assert { type: "json" };
+// import colleges from "./colleges.json" assert { type: "json" };
  // <-- import the array we built
-
+import colleges from "../src/colleges.js";
 const prisma = new PrismaClient();
 
 async function main() {

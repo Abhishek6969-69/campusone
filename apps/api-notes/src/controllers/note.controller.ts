@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.ts";
+import { AuthRequest } from "../middleware/auth";
 import * as noteService from "../services/note.service.ts";
 
 // ✅ Upload Note

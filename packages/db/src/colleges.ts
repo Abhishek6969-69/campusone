@@ -1,4 +1,143 @@
-// @ts-ignore because TS doesn’t like json without resolveJsonModule
-import colleges from "../prisma/colleges.json";
-
-export default colleges;
+const colleges = [
+  {
+    "name": "Indian Institute of Technology (IIT) Delhi",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "type": "Government",
+    "affiliation": "Institute of National Importance"
+  },
+  {
+    "name": "Indian Institute of Technology (IIT) Bombay",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "type": "Government",
+    "affiliation": "Institute of National Importance"
+  },
+  {
+    "name": "Indian Institute of Technology (IIT) Kanpur",
+    "city": "Kanpur",
+    "state": "Uttar Pradesh",
+    "type": "Government",
+    "affiliation": "Institute of National Importance"
+  },
+  {
+    "name": "Indian Institute of Technology (IIT) Madras",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "type": "Government",
+    "affiliation": "Institute of National Importance"
+  },
+  {
+    "name": "National Institute of Technology (NIT) Trichy",
+    "city": "Tiruchirappalli",
+    "state": "Tamil Nadu",
+    "type": "Government",
+    "affiliation": "Institute of National Importance"
+  },
+  {
+    "name": "JSS Academy of Technical Education (JSSATE)",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated, NIRF Rank 201-300 (2024)"
+  },
+  {
+    "name": "Amity University",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "UGC approved, NIRF Rank 30 (2024)"
+  },
+  {
+    "name": "Jaypee Institute of Information Technology (JIIT)",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "NIRF Rank 101-150 (2024)"
+  },
+  {
+    "name": "Noida Institute of Engineering and Technology (NIET)",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated, NAAC 'A' accredited"
+  },
+  {
+    "name": "Galgotias University",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "UGC approved"
+  },
+  {
+    "name": "Sharda University",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "UGC approved"
+  },
+  {
+    "name": "G.L. Bajaj Institute of Technology and Management",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated"
+  },
+  {
+    "name": "Bennett University",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "UGC approved"
+  },
+  {
+    "name": "ITS Engineering College",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated"
+  },
+  {
+    "name": "Maharishi University of Information Technology (MUIT)",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "UGC approved"
+  },
+  {
+    "name": "Greater Noida Institute of Technology (GNIOT)",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU & GGSIPU affiliated"
+  },
+  {
+    "name": "Mahatma Gandhi Mission's College Of Engineering & Technology",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated"
+  },
+  {
+    "name": "Sarvottam Institute of Technology and Management",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated"
+  },
+  {
+    "name": "KCC Institute of Technology and Management",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "AKTU affiliated"
+  },
+  {
+    "name": "Shiv Nadar Institution of Eminence",
+    "city": "Greater Noida",
+    "state": "Uttar Pradesh",
+    "type": "Private",
+    "affiliation": "UGC approved"
+  }
+]
+ export default colleges;

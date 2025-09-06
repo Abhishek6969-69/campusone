@@ -1,19 +1,36 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { getStudentAttendance, getEvents, getNotes } from "@/lib/api";
 import SubjectAttendanceTable from "../../components/SubjectAttendanceTable";
 
 export default function StudentDashboard() {
-  // 🚨 For demo, use seeded Bob (JSS) or Raj (IITD)
-  // Later: replace with `session.user.id` from NextAuth
-  const studentId = "4c0618ef-4753-4907-bcab-d1fc51471f17"; // Bob (JSS)
-  // const studentId = "raj-student-id-from-seed"; // Raj (IITD)
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "loading") return; // Still loading
+    if (!session) {
+      router.push("/signup"); // Not authenticated, redirect to signup
+      return;
+    }
+    if (session.user.role !== "STUDENT") {
+      router.push("/"); // Not a student, redirect to home
+      return;
+    }
+  }, [session, status, router]);
+
+  // Use actual student ID from session
+  const studentId = session?.user?.id;
 
   // Attendance
   const { data: attendance = [] } = useQuery({
     queryKey: ["attendance", studentId],
-    queryFn: () => getStudentAttendance(studentId),
+    queryFn: () => getStudentAttendance(studentId!),
+    enabled: !!studentId,
   });
 
   // Events (college scoped automatically via backend)
@@ -28,6 +45,22 @@ export default function StudentDashboard() {
     queryFn: getNotes,
   });
 
+  // Loading state
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session || session.user.role !== "STUDENT") {
+    return null; // Will redirect in useEffect
+  }
+
   // Attendance stats
   const total = attendance.length;
   const present = attendance.filter((r: any) => r.status === "PRESENT").length;
@@ -35,7 +68,18 @@ export default function StudentDashboard() {
 
   return (
     <div className="p-6 text-gray-800 dark:text-gray-200 transition-colors">
-      <h1 className="text-2xl font-bold mb-6">🎓 Student Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">🎓 Student Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Welcome back, {session.user.name}!
+          </p>
+        </div>
+        <div className="text-right text-sm text-gray-500 dark:text-gray-400">
+          <p>{session.user.collegeName}</p>
+          {session.user.rollNo && <p>Roll No: {session.user.rollNo}</p>}
+        </div>
+      </div>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
         {/* Attendance Card */}

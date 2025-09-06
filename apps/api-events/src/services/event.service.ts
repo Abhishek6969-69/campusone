@@ -17,13 +17,18 @@ export const createEvent = async (data: {
 
 // ✅ Get All Events (college scoped)
 export const getEvents = async (collegeId: string) => {
+  const now = new Date();
   return await prisma.event.findMany({
-    where: { collegeId },
+    where: { 
+      collegeId,
+      date: { gte: now } // Only get upcoming events
+    },
     include: {
       creator: { select: { id: true, name: true, email: true } },
       rsvps: { include: { user: { select: { id: true, name: true, email: true } } } },
     },
-    orderBy: { date: "asc" },
+    orderBy: { date: "asc" }, // Show nearest events first
+    take: 10 // Limit to 10 upcoming events
   });
 };
 

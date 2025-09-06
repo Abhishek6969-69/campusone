@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import {prisma} from "@campusone/db";
+import {prisma} from "@campusone/db";;
 
 // Extend Express Request
 export interface AuthRequest extends Request {
@@ -28,32 +28,44 @@ const DEV_USERS: Record<string, any> = {
 };
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
- if (process.env.NODE_ENV === "development") {
-    // 🚨 DEV MODE: use fake user
-    const userKey = process.env.DEV_USER || "BOB";
-    req.user = DEV_USERS[userKey];
-    return next();
-  }
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      console.error('No Authorization header');
+      return res.status(401).json({ error: "No Authorization header" });
+    }
 
-    try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "No token provided" });
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      console.error('No token in Authorization header');
+      return res.status(401).json({ error: "No token provided" });
+    }
 
-    // Decode token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    console.log('Verifying token:', token);
 
-    // Fetch user from DB
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, role: true, email: true, collegeId: true },
-    });
+    // Use the same secret as NextAuth
+    const JWT_SECRET = "1fa5a2ede80c596e194c53be8216445230f791c6964aa1dd9d7b9bee435985ab";
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      id: string;
+      email: string;
+      role: string;
+      collegeId: string;
+      name?: string;
+    };
 
-    if (!user) return res.status(401).json({ error: "User not found" });
+    console.log('Decoded token:', decoded);
 
-    req.user = user; // ✅ Attach user object to request
+    // Use the decoded token data directly since it's signed by NextAuth
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+      collegeId: decoded.collegeId
+    };
     next();
   } catch (err) {
-    res.status(401).json({ error: "Unauthorized" });
+    console.error('Token verification failed:', err);
+    res.status(401).json({ error: "Invalid token" });
   }
 };
 

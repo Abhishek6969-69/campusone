@@ -11,6 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "@campusone/db": ["packages/db/src"]
-    }
+    },
+    "jsx": "react-jsx"
   }
 }

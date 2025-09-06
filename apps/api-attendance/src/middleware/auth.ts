@@ -1,7 +1,5 @@
-'use server'
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import {prisma} from "@campusone/db";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -11,6 +9,7 @@ export interface AuthRequest extends Request {
     email: string;
   };
 }
+
 const DEV_USERS: Record<string, any> = {
   BOB: {
     id: "4c0618ef-4753-4907-bcab-d1fc51471f17",
@@ -18,17 +17,11 @@ const DEV_USERS: Record<string, any> = {
     email: "bob@jss.edu",
     collegeId: "7cf346c6-53e7-457a-831c-199bf0bbe153",
   },
-//   RAJ: {
-//     id: "raj-user-id-from-seed", // fill in from your seeding logs
-//     role: "STUDENT",
-//     email: "raj@iitd.ac.in",
-//     collegeId: "iitd-college-id-from-seed",
-//   },
 };
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  if (process.env.NODE_ENV === "development") {
-    // 🚨 DEV MODE: use fake user
+  if (process.env.NODE_ENV === "development" && process.env.USE_DEV_USER === "true") {
+    // 🚨 DEV MODE: use fake user only if explicitly enabled
     const userKey = process.env.DEV_USER || "BOB";
     req.user = DEV_USERS[userKey];
     return next();
@@ -38,16 +31,21 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ error: "No token provided" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    // Verify JWT token from Next.js
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+      role: string;
+      email: string;
+      collegeId: string;
+    };
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, role: true, email: true, collegeId: true },
-    });
-
-    if (!user) return res.status(401).json({ error: "User not found" });
-
-    req.user = user; // ✅ attach to request
+    // We can trust the token since it's signed by Next.js
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+      email: decoded.email,
+      collegeId: decoded.collegeId,
+    };
     next();
   } catch (err) {
     res.status(401).json({ error: "Unauthorized" });

@@ -5,8 +5,8 @@ import {
   getAttendancePercentage,
   getClassSummary,
   markAttendance,
-} from "../controllers/attendance.controller.ts";
-import { authMiddleware, requireRole } from "../middleware/auth.ts";
+} from "../controllers/attendance.controller";
+import { authMiddleware, requireRole } from "../middleware/auth";
 
 const router = Router();
 

@@ -1,5 +1,4 @@
 import {prisma} from "@campusone/db";
-
 type NoteInput = {
   title: string;
   description?: string;

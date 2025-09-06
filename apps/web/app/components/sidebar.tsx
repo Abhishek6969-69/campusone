@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
   Menu,
@@ -16,19 +17,35 @@ import {
   User,
 } from "lucide-react";
 
-const navItems = [
+const commonNavItems = [
+  { href: "/events", label: "Events", icon: Calendar },
+  { href: "/notes", label: "Notes", icon: FileText },
+  { href: "/profile", label: "Profile", icon: User },
+];
+
+const professorNavItems = [
+  { href: "/professor", label: "Dashboard", icon: Home },
+  { href: "/attendance", label: "Attendance", icon: BookOpen },
+  ...commonNavItems,
+];
+
+const studentNavItems = [
   { href: "/student", label: "Dashboard", icon: Home },
   { href: "/attendance", label: "Attendance", icon: BookOpen },
-  { href: "/notes", label: "Notes", icon: FileText },
   { href: "/canteen", label: "Canteen", icon: Utensils },
-  { href: "/events", label: "Events", icon: Calendar },
   { href: "/coding", label: "Coding", icon: Code },
-  { href: "/profile", label: "Profile", icon: User },
+  ...commonNavItems,
 ];
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  // Determine which nav items to show based on user role
+  const userNavItems = session?.user.role === "PROFESSOR" 
+    ? professorNavItems 
+    : studentNavItems;
 
   return (
     <>
@@ -59,7 +76,7 @@ export default function Sidebar() {
         </h2>
 
         <nav className="space-y-4 flex-1">
-          {navItems.map((item) => {
+          {userNavItems.map((item: { href: string; label: string; icon: any }) => {
             const Icon = item.icon;
             return (
               <Link

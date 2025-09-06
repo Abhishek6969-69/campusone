@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.ts";
-import * as attendanceService from "../services/attendance.service.ts";
+import { AuthRequest } from "../middleware/auth";
+import * as attendanceService from "../services/attendance.service";
 
 // ✅ Bulk mark attendance
 export const bulkMarkAttendance = async (req: AuthRequest, res: Response) => {
